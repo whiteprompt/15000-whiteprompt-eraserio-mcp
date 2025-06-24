@@ -1,0 +1,41 @@
+{
+  "name": "Eraser MCP Development",
+  "dockerFile": "Dockerfile",
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "containerEnv": {
+    "ERASER_API_KEY": "${localEnv:ERASER_API_KEY:}",
+    "CLAUDE_API_KEY": "${localEnv:CLAUDE_API_KEY:}",
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY:}"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "anthropic.claude-dev",
+        "continue.continue"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "claude-dev.apiKey": "${CLAUDE_API_KEY}",
+        "continue.telemetryEnabled": false,
+        "continue.enableTabAutocomplete": true
+      }
+    }
+  },
+  "postCreateCommand": "npm install && sudo npm install -g @anthropic-ai/claude-code",
+  "postStartCommand": "echo 'Dev container ready!'",
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": false,
+      "installOhMyZsh": false,
+      "username": "vscode",
+      "uid": "1000",
+      "gid": "1000"
+    }
+  }
+}

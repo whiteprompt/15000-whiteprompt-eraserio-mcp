@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.DS_Store
+*.log
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.npm/
+.eslintcache
+.tsbuildinfo
+
+# Test artifacts
+tests/*.png
+tests/test-diagram.png
