@@ -12,6 +12,7 @@ This is an MCP (Model Context Protocol) server that provides tools for creating 
 - `npm run dev` - Run the server in development mode with hot reload
 - `npm run build` - Build TypeScript to JavaScript
 - `npm run start` - Run the built server
+- `npm run start -- --config` - Show Claude Desktop configuration only
 - `npm run lint` - Run ESLint on the codebase
 - `npm run typecheck` - Run TypeScript type checking without emitting files
 
@@ -35,9 +36,20 @@ The create_diagram tool:
 3. Returns URLs for viewing and editing the generated diagram
 
 Key files:
-- `src/index.ts` - Main server implementation with tool handlers
-- Uses MCP SDK for server setup and tool registration
+- `src/index.ts` - Main server implementation with tool handlers (all logic is here)
+- Uses MCP SDK (@modelcontextprotocol/sdk) for server setup and tool registration
 - Uses axios for HTTP requests to Eraser API
+- Built-in validation and fix rules for all four diagram types
+
+## Code Structure
+
+The entire server is implemented in a single file (`src/index.ts:1-832`) with:
+- Tool definitions with detailed descriptions (`src/index.ts:74-305`)
+- Validation rules by diagram type (`src/index.ts:325-414`)
+- Validation function (`src/index.ts:416-491`)
+- Fix function with common corrections (`src/index.ts:493-597`)
+- Request handlers for each tool (`src/index.ts:599-737`)
+- Configuration generation for Claude Desktop (`src/index.ts:739-771`)
 
 ## Environment Setup
 
@@ -66,6 +78,16 @@ The API returns:
 
 Supported diagram types:
 - sequence-diagram
-- cloud-architecture-diagram
+- cloud-architecture-diagram  
 - entity-relationship-diagram
-- flowchart
+- flowchart-diagram
+
+## Development Notes
+
+- All server logic is contained in a single TypeScript file for simplicity  
+- The server includes robust validation and auto-fixing capabilities
+- Error handling includes detailed API error messages and status codes
+- Environment variable loading tries multiple .env file locations
+- DevContainer support with host machine integration for Claude Desktop
+- Configuration output includes different setups for devcontainer vs local development
+- Server detects MCP mode vs manual running to avoid stdout pollution that causes timeouts

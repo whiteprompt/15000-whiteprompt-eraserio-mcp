@@ -794,36 +794,37 @@ async function main() {
     },
   });
 
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error('Eraser MCP server running');
-  
-  // Output Claude Desktop configuration
+  // Output Claude Desktop configuration before connecting (only if not running via MCP)
   const config = getClaudeDesktopConfig();
-  
-  console.error('\n=== Claude Desktop Configuration ===');
-  console.error('Add this to your Claude Desktop settings:\n');
-  console.error(JSON.stringify(config, null, 2));
-  
   const isDevContainer = process.env.REMOTE_CONTAINERS || process.env.CODESPACES;
   
-  if (isDevContainer) {
-    console.error('\n⚠️  DevContainer Detected!');
-    console.error('You are running inside a devcontainer. To use with Claude Desktop:');
-    console.error('1. Copy scripts/claude-wrapper.sh to your host machine');
-    console.error('2. Update the wrapper script with your container name');
-    console.error('3. Use the wrapper script path in the configuration above');
-    console.error('\nAlternatively, use scripts/run-on-host.sh to run on your host machine.');
-  } else if (envLoaded) {
-    console.error('\nNote: API key loaded from .env file');
-    console.error('The .env file will be used automatically when the server starts');
-  } else {
-    console.error('\nNote: No .env file found');
-    console.error('You need to add your ERASER_API_KEY to the env section above');
+  // Only show config info if we're not running in MCP mode (detected by checking if stdout is a TTY)
+  if (process.stdout.isTTY) {
+    console.error('\n=== Claude Desktop Configuration ===');
+    console.error('Add this to your Claude Desktop settings:\n');
+    console.error(JSON.stringify(config, null, 2));
+    
+    if (isDevContainer) {
+      console.error('\n⚠️  DevContainer Detected!');
+      console.error('You are running inside a devcontainer. To use with Claude Desktop:');
+      console.error('1. Copy scripts/claude-wrapper.sh to your host machine');
+      console.error('2. Update the wrapper script with your container name');
+      console.error('3. Use the wrapper script path in the configuration above');
+      console.error('\nAlternatively, use scripts/run-on-host.sh to run on your host machine.');
+    } else if (envLoaded) {
+      console.error('\nNote: API key loaded from .env file');
+      console.error('The .env file will be used automatically when the server starts');
+    } else {
+      console.error('\nNote: No .env file found');
+      console.error('You need to add your ERASER_API_KEY to the env section above');
+    }
+    
+    console.error('\n===================================\n');
+    console.error('To show only the config, run: npm start -- --config');
   }
-  
-  console.error('\n===================================\n');
-  console.error('To show only the config, run: npm start -- --config');
+
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
 }
 
 main().catch((error) => {
