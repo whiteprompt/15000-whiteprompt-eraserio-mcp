@@ -3,6 +3,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ListPromptsRequestSchema,
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
@@ -38,7 +40,7 @@ for (const envPath of possiblePaths) {
   }
 }
 
-if (!envLoaded) {
+if (!envLoaded && process.stdout.isTTY) {
   console.error('Warning: Could not find .env file in any of the expected locations');
   console.error('Searched in:', possiblePaths);
 }
@@ -49,9 +51,11 @@ const ERASER_API_BASE_URL = 'https://app.eraser.io/api';
 // Only validate API key if not in config-only mode
 function validateApiKey() {
   if (!ERASER_API_KEY) {
-    console.error('Error: ERASER_API_KEY environment variable is required');
-    console.error('Please ensure you have a .env file with ERASER_API_KEY=your_api_key');
-    console.error('Or set the environment variable directly: export ERASER_API_KEY=your_api_key');
+    if (process.stdout.isTTY) {
+      console.error('Error: ERASER_API_KEY environment variable is required');
+      console.error('Please ensure you have a .env file with ERASER_API_KEY=your_api_key');
+      console.error('Or set the environment variable directly: export ERASER_API_KEY=your_api_key');
+    }
     process.exit(1);
   }
 }
@@ -64,6 +68,8 @@ const server = new Server(
   {
     capabilities: {
       tools: {},
+      resources: {},
+      prompts: {},
     },
   }
 );
@@ -307,6 +313,18 @@ const TOOLS: Tool[] = [
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: TOOLS,
+  };
+});
+
+server.setRequestHandler(ListResourcesRequestSchema, async () => {
+  return {
+    resources: [],
+  };
+});
+
+server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  return {
+    prompts: [],
   };
 });
 
@@ -613,6 +631,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         background?: boolean;
       };
 
+      // Check API key at runtime
+      if (!ERASER_API_KEY) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Error: ERASER_API_KEY environment variable is required. Please configure your API key.',
+            },
+          ],
+        };
+      }
+
       try {
         const response = await eraserApi.post('/render/elements', {
           theme,
@@ -782,24 +812,15 @@ async function main() {
     process.exit(0);
   }
 
-  // Validate API key for normal operation
-  validateApiKey();
-  
-  // Initialize axios with the API key
-  eraserApi = axios.create({
-    baseURL: ERASER_API_BASE_URL,
-    headers: {
-      'Authorization': `Bearer ${ERASER_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-  });
-
-  // Output Claude Desktop configuration before connecting (only if not running via MCP)
-  const config = getClaudeDesktopConfig();
-  const isDevContainer = process.env.REMOTE_CONTAINERS || process.env.CODESPACES;
-  
-  // Only show config info if we're not running in MCP mode (detected by checking if stdout is a TTY)
+  // Only validate API key and show config in TTY mode (manual execution)
   if (process.stdout.isTTY) {
+    // Validate API key for normal operation
+    validateApiKey();
+    
+    // Output Claude Desktop configuration before connecting
+    const config = getClaudeDesktopConfig();
+    const isDevContainer = process.env.REMOTE_CONTAINERS || process.env.CODESPACES;
+    
     console.error('\n=== Claude Desktop Configuration ===');
     console.error('Add this to your Claude Desktop settings:\n');
     console.error(JSON.stringify(config, null, 2));
@@ -822,12 +843,23 @@ async function main() {
     console.error('\n===================================\n');
     console.error('To show only the config, run: npm start -- --config');
   }
+  
+  // Initialize axios with the API key (defer validation to first use)
+  eraserApi = axios.create({
+    baseURL: ERASER_API_BASE_URL,
+    headers: {
+      'Authorization': `Bearer ${ERASER_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+  });
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
 
 main().catch((error) => {
-  console.error('Server error:', error);
+  if (process.stdout.isTTY) {
+    console.error('Server error:', error);
+  }
   process.exit(1);
 });
