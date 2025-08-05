@@ -71,18 +71,6 @@ For better organization and persistent access to diagram syntax references, crea
 1. **Create a new project** in Claude Desktop by clicking the "+" icon in the sidebar
 2. **Name your project** (e.g., "Eraser Diagrams" or "System Architecture")
 3. **Add the syntax guide** by uploading or copying the [diagram syntax documentation](CLAUDE_DESKTOP_PROJECT_INSTRUCTIONS.md) to your project knowledge base
-4. **Set a custom instruction** for your project to automatically use the Eraser MCP tools:
-
-```
-You have access to Eraser.io diagram tools for creating professional diagrams. When I ask for diagrams:
-1. Use create_diagram to generate diagrams on Eraser.io
-2. Always validate syntax with validate_diagram first if unsure
-3. Use fix_diagram to automatically correct common syntax errors
-4. Support these diagram types: sequence-diagram, flowchart-diagram, cloud-architecture-diagram, entity-relationship-diagram
-5. Refer to the Eraser syntax guide in this project's knowledge for proper formatting
-
-Default to dark theme and include background in rendered images.
-```
 
 **Benefits of using a project:**
 - Persistent access to diagram syntax documentation
