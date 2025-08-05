@@ -88,17 +88,38 @@ npm run start
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
-#### Getting Your Configuration
+#### Option 1: Docker Configuration (Recommended)
 
-The server will output the exact configuration needed when you run it. You can also get just the configuration by running:
+The easiest way to run with Claude Desktop is using Docker directly:
 
+1. Build the Docker image:
 ```bash
-npm start -- --config
+./scripts/build-claude-docker.sh
 ```
 
-This will output the configuration JSON that you need to add to your configuration file.
+2. Add this to your Claude Desktop configuration:
+```json
+{
+  "mcpServers": {
+    "eraser": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--env-file", "/absolute/path/to/your/.env",
+        "eraser-mcp:claude"
+      ]
+    }
+  }
+}
+```
 
-#### Setting Up
+See [CLAUDE_DESKTOP_DOCKER.md](CLAUDE_DESKTOP_DOCKER.md) for detailed Docker setup instructions.
+
+#### Option 2: Local Node.js Configuration
+
+If you prefer running locally:
 
 1. Run `npm start -- --config` to get your configuration
 2. Open your Claude Desktop configuration file (create it if it doesn't exist)
