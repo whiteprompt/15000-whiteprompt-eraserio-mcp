@@ -7,7 +7,7 @@ echo ""
 # Check if .env file exists
 if [ ! -f "../.env" ]; then
     echo "❌ Error: .env file not found in parent directory"
-    echo "Please create a .env file with ERASER_API_KEY=your_api_key"
+    echo "Please create a .env file with ERASER_API_KEY=yourapikey"
     exit 1
 fi
 

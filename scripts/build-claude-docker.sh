@@ -27,7 +27,7 @@ cat << 'EOF'
         "run",
         "-i",
         "--rm",
-        "-e", "ERASER_API_KEY=your_api_key_here",
+        "-e", "ERASER_API_KEY=yourapikey",
         "eraser-mcp:claude"
       ]
     }

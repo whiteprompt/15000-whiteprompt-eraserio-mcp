@@ -1,6 +1,6 @@
-# Claude Desktop Docker Configuration
+# Claude Desktop Setup with Docker
 
-This guide shows how to run the Eraser MCP server directly through Docker from Claude Desktop, eliminating the need for wrapper scripts or local Node.js installation.
+This guide shows how to set up the Eraser MCP server with Claude Desktop using Docker.
 
 ## Quick Setup
 
@@ -10,13 +10,18 @@ This guide shows how to run the Eraser MCP server directly through Docker from C
 ./scripts/build-claude-docker.sh
 ```
 
-This creates a Docker image named `eraser-mcp:claude` optimized for Claude Desktop integration.
+This creates a Docker image named `eraser-mcp:claude`.
 
 ### 2. Configure Claude Desktop
 
-Add this configuration to your Claude Desktop settings:
+Add this configuration to your Claude Desktop settings file:
 
-#### Option A: With API Key in Configuration
+#### Configuration File Location
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+#### Configuration with API Key
 ```json
 {
   "mcpServers": {
@@ -26,7 +31,7 @@ Add this configuration to your Claude Desktop settings:
         "run",
         "-i",
         "--rm",
-        "-e", "ERASER_API_KEY=your_actual_api_key_here",
+        "-e", "ERASER_API_KEY=yourapikey",
         "eraser-mcp:claude"
       ]
     }
@@ -34,7 +39,9 @@ Add this configuration to your Claude Desktop settings:
 }
 ```
 
-#### Option B: Using .env File (Recommended)
+#### Alternative: Using .env File
+If you have a `.env` file with your API key:
+
 ```json
 {
   "mcpServers": {
@@ -52,68 +59,38 @@ Add this configuration to your Claude Desktop settings:
 }
 ```
 
-## Configuration Details
+### 3. Restart Claude Desktop
 
-### Docker Arguments Explained
+After saving the configuration file, completely quit and restart Claude Desktop.
 
-- `run`: Start a new container
-- `-i`: Interactive mode (required for MCP stdio communication)
-- `--rm`: Automatically remove container when it exits
-- `-e ERASER_API_KEY=...`: Set environment variable directly
-- `--env-file /path/to/.env`: Load environment variables from file
+## Testing Your Setup
 
-### Environment Variables
+Test the configuration by asking Claude Desktop:
+- "Can you create a sequence diagram?"
+- "Show me what Eraser diagram tools you have available"
 
-The container needs the `ERASER_API_KEY` environment variable. You can provide it either:
-
-1. **Directly in configuration**: Replace `your_actual_api_key_here` with your API key
-2. **Via .env file**: Create a `.env` file with `ERASER_API_KEY=your_key` and reference it
-
-## Advantages of Docker Approach
-
-✅ **No Local Dependencies**: No need for Node.js installation on host  
-✅ **Consistent Environment**: Same runtime environment every time  
-✅ **Easy Updates**: Rebuild image to update the server  
-✅ **Isolation**: Server runs in isolated container  
-✅ **No Wrapper Scripts**: Direct Docker execution from Claude Desktop  
-
-## Building and Updating
-
-### Initial Build
-```bash
-./scripts/build-claude-docker.sh
-```
-
-### Rebuilding After Changes
-```bash
-# After making code changes
-./scripts/build-claude-docker.sh
-```
-
-### Manual Build (if needed)
-```bash
-docker build -f Dockerfile.claude -t eraser-mcp:claude .
-```
+If working correctly, Claude will have access to:
+- `create_diagram` - Creates and renders diagrams
+- `validate_diagram` - Validates diagram syntax
+- `fix_diagram` - Fixes common syntax errors
 
 ## Troubleshooting
 
-### Container Not Found
+### Docker Image Not Found
 **Error**: `Unable to find image 'eraser-mcp:claude'`  
-**Solution**: Run the build script first: `./scripts/build-claude-docker.sh`
+**Solution**: Run the build script: `./scripts/build-claude-docker.sh`
 
 ### API Key Issues
 **Error**: `ERASER_API_KEY environment variable is required`  
 **Solution**: 
-- Check your `.env` file exists and contains the API key
-- Verify the path to `.env` file is absolute in the configuration
-- Or use the direct environment variable approach
+- Check your API key is correct in the configuration
+- For .env file approach, verify the path is absolute and file exists
 
 ### Permission Issues
 **Error**: Docker permission denied  
 **Solution**: Ensure Docker is running and your user has Docker permissions
 
-### Testing the Configuration
-
+### Manual Testing
 Before adding to Claude Desktop, test manually:
 
 ```bash
@@ -126,29 +103,12 @@ echo '{"method":"tools/list"}' | docker run -i --rm --env-file .env eraser-mcp:c
 
 Both should return a JSON response listing the available MCP tools.
 
-## Claude Desktop Configuration File Locations
+## Updating
 
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-- **Linux**: `~/.config/Claude/claude_desktop_config.json`
+To update after making code changes:
 
-## Example Complete Configuration
-
-```json
-{
-  "mcpServers": {
-    "eraser": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--env-file", "/Users/yourname/projects/EraserMCP/.env",
-        "eraser-mcp:claude"
-      ]
-    }
-  }
-}
+```bash
+./scripts/build-claude-docker.sh
 ```
 
-After adding this configuration, restart Claude Desktop to load the MCP server.
+This rebuilds the Docker image with your latest changes.

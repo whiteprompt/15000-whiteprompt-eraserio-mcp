@@ -53,8 +53,8 @@ function validateApiKey() {
   if (!ERASER_API_KEY) {
     if (process.stdout.isTTY) {
       console.error('Error: ERASER_API_KEY environment variable is required');
-      console.error('Please ensure you have a .env file with ERASER_API_KEY=your_api_key');
-      console.error('Or set the environment variable directly: export ERASER_API_KEY=your_api_key');
+          console.error('Please ensure you have a .env file with ERASER_API_KEY=yourapikey');
+    console.error('Or set the environment variable directly: export ERASER_API_KEY=yourapikey');
     }
     process.exit(1);
   }
@@ -793,7 +793,7 @@ function getClaudeDesktopConfig() {
   // Only include env if .env file was not loaded successfully
   if (!envLoaded && !isDevContainer) {
     config.mcpServers.eraser.env = {
-      ERASER_API_KEY: "your_api_key_here"
+              ERASER_API_KEY: "yourapikey"
     };
   }
   
